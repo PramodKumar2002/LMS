@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = import.meta.env.VITE_API || 'http://localhost:5000/api';
+const BASE = import.meta.env.VITE_API || 'https://lms-ur6l.onrender.com';
 
 const api = axios.create({
   baseURL: BASE,
