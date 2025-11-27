@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function Dashboard({ user }) {
+export default function SearchBooks({ user }) {
   return (
     <div>
       <div className="card">
@@ -13,7 +13,7 @@ export default function Dashboard({ user }) {
         <div className="col card">
           <h4>Books</h4>
           <p className="small">Search and manage book issue/returns.</p>
-          <Link className="btn" to="/search">Search Books</Link>
+          <Link className="btn" to="/searchbook">Search Books</Link>
         </div>
 
         <div className="col card">

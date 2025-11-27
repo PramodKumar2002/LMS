@@ -3,40 +3,59 @@ import api from '../api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Register({ setUser }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [err, setErr] = useState('');
+
+  const [name, setName] = useState("");   // added name state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
+
   const nav = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
-    setErr('');
-    if (!email || !password) return setErr('Enter email and password');
+    setErr("");
+
+    if (!name || !email || !password)
+      return setErr("Enter name, email and password");
+
     try {
-      const { data } = await api.post('/auth/login', { email, password });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      const { data } = await api.post('/auth/register', { name, email, password });
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setUser(data.user);
-      nav('/');
+      nav("/");
     } catch (err) {
-      setErr(err.response?.data?.message || 'Login failed');
+      setErr(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
     <div className="login-wrapper">
+
       <div className="login-card">
-        <h2 className="login-title">Welcome Back</h2>
-        <p className="login-sub">Please login to continue</p>
+        <h2 className="login-title">Welcome</h2>
+        <p className="login-sub">Please Register here!</p>
 
         {err && <div className="error-box">{err}</div>}
 
+        <div className="login-form">
+          <label>Full Name</label>
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+            type="text"
+          />
+        </div>
+
         <form onSubmit={submit} className="login-form">
+
           <label>Email</label>
           <input
             className="input"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
           />
 
@@ -45,17 +64,17 @@ export default function Register({ setUser }) {
             className="input"
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
           />
 
           <button className="btn login-btn" type="submit">
-            Login
+            Register
           </button>
         </form>
 
         <p className="info-text">
-          Use Postman to create admin/user first time.  
+          You have an account? <a href="/login">Login</a>
         </p>
       </div>
     </div>

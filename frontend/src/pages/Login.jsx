@@ -55,7 +55,7 @@ export default function Login({ setUser }) {
         </form>
 
         <p className="info-text">
-          Use Postman to create admin/user first time.  
+          Don't have an account? <a href="/register">Register here</a>
         </p>
       </div>
     </div>

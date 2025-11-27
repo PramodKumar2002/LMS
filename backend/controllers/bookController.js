@@ -22,10 +22,12 @@ exports.updateBook = async (req, res) => {
 };
 
 exports.searchBooks = async (req, res) => {
-  const q = req.query.q || '';
-  // simple search by title/author
+  const q = (req.query.q || '').trim();
+  // simple search by title/author/serial
   const regex = new RegExp(q, 'i');
-  const books = await Book.find({ $or: [{ title: regex }, { author: regex }] });
+  const books = q
+    ? await Book.find({ $or: [{ title: regex }, { author: regex }, { serialNo: regex }] })
+    : await Book.find().limit(100); // return a reasonable default set when no query
   res.json(books);
 };
 

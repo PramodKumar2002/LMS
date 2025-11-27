@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import NavBar from './components/NavBar.jsx';
+import AdminLogin from './pages/AdminLogin.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -16,6 +18,7 @@ import Membership from './pages/Membership.jsx';
 import Users from './pages/Users.jsx';
 import Maintenance from './pages/Maintenance.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
+import SearchBook from './pages/SearchBook.jsx';
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -40,9 +43,12 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/register" element={<Register setUser={setUser} />} />
+             <Route path="/admin/login" element={<AdminLogin setUser={setUser} />} />
++           <Route path="/admin" element={<PrivateRoute><AdminDashboard user={user} /></PrivateRoute>} />
             
             <Route path="/" element={<PrivateRoute><Dashboard user={user} /></PrivateRoute>} />
             <Route path="/search" element={<PrivateRoute><SearchBooks user={user} /></PrivateRoute>} />
+            <Route path="/searchbook" element={<PrivateRoute><SearchBook user={user} /></PrivateRoute>} />
             <Route path="/issue" element={<PrivateRoute><IssueBook user={user} /></PrivateRoute>} />
             <Route path="/return" element={<PrivateRoute><ReturnBook user={user} /></PrivateRoute>} />
             <Route path="/add-book" element={<PrivateRoute><AddBook user={user} /></PrivateRoute>} />

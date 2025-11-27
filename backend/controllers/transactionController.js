@@ -1,5 +1,6 @@
 const Transaction = require('../models/Transaction');
 const Book = require('../models/Book');
+const User = require('../models/User'); // added
 
 function calculateFine(returnDate, actualReturnDate) {
   if(!actualReturnDate) return 0;
@@ -10,29 +11,54 @@ function calculateFine(returnDate, actualReturnDate) {
 }
 
 exports.issueBook = async (req, res) => {
-  const { bookId, returnDate } = req.body;
+  const { bookId, returnDate, email } = req.body;
   if(!bookId) return res.status(400).json({ message: 'Book id required' });
+  if(!returnDate) return res.status(400).json({ message: 'Return date required' });
+
   try {
     const book = await Book.findById(bookId);
-    if(!book || !book.available) return res.status(400).json({ message: 'Book not available' });
+    if(!book) return res.status(404).json({ message: 'Book not found' });
 
-    const issueDate = new Date();
-    const defaultReturnDate = returnDate ? new Date(returnDate) : new Date(+issueDate + 15*24*60*60*1000);
-    // ensure return date not earlier than issue or later than 15 days ahead if constraint needed - follow your rule: default 15 days, user may set earlier but not >15 days? We'll allow up to 15 days.
-    const maxReturn = new Date(+issueDate + 15*24*60*60*1000);
-    if(defaultReturnDate > maxReturn) defaultReturnDate.setTime(maxReturn.getTime());
+    // check availability if model uses availableCount or available flag
+    if (book.availableCount != null && book.availableCount <= 0) {
+      return res.status(400).json({ message: 'No available copies' });
+    }
+    if (book.available === false) {
+      return res.status(400).json({ message: 'Selected copy is not available' });
+    }
 
+    // determine target user: admin may provide 'email' to issue to another user
+    let targetUserId = req.user._id;
+    if (email && req.user?.isAdmin) {
+      const target = await User.findOne({ email: email.trim().toLowerCase() });
+      if (!target) return res.status(404).json({ message: 'Target user not found' });
+      targetUserId = target._id;
+    }
+
+    // create transaction
     const tx = await Transaction.create({
-      user: req.user._id,
+      user: targetUserId,
       book: book._id,
-      issueDate,
-      returnDate: defaultReturnDate
+      issueDate: new Date(),
+      returnDate: new Date(returnDate),
+      fineAmount: 0,
+      finePaid: false
     });
-    book.available = false;
-    await book.save();
-    res.json(tx);
+
+    // decrement available count if present
+    if (book.availableCount != null) {
+      book.availableCount = Math.max(0, book.availableCount - 1);
+      await book.save();
+    } else if (typeof book.available === 'boolean') {
+      // optional: if only boolean present, mark not available
+      book.available = false;
+      await book.save();
+    }
+
+    res.json({ message: 'Book issued', transaction: tx });
   } catch(err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error(err);
+    res.status(500).json({ message: 'Server error', err: err.message });
   }
 };
 
